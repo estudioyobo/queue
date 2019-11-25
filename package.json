@@ -1,12 +1,29 @@
 {
+  "name": "@yobo/queue",
+  "version": "1.0.0",
+  "main": "index.js",
   "dependencies": {
-    "cors": "^2.8.5",
     "cron": "^1.7.2",
-    "express": "^4.17.1",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
     "jest": "^24.9.0",
     "mockdate": "^2.0.5"
-  }
+  },
+  "scripts": {
+    "test": "jest --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:estudioyobo/queue.git"
+  },
+  "author": "Estudio Yobo <info@estudioyobo.com>",
+  "bugs": {
+    "url": "https://github.com/estudioyobo/queue/issues"
+  },
+  "homepage": "https://github.com/estudioyobo/queue",
+  "license": "MIT",
+  "description": "Package to call periodic callbacks within an interval given a time range."
 }
