@@ -3,8 +3,8 @@ const uuid = require("uuid/v4");
 
 let QUEUES = {};
 
-function minutesToMiliseconds(time) {
-  return time * 100 * 60;
+function minutesToMiliseconds(minutes) {
+  return minutes * 1000 * 60;
 }
 
 function stringTimeToDate(stringTime) {
