@@ -4,7 +4,7 @@ const uuid = require("uuid/v4");
 let QUEUES = {};
 
 function minutesToMiliseconds(time) {
-  return time * 1000 * 60;
+  return time * 100 * 60;
 }
 
 function stringTimeToDate(stringTime) {
@@ -72,18 +72,24 @@ function isInPublishingRange2({ startTime, endTime }, now = new Date()) {
   }
 }
 
-function startQueue({ startTime, endTime, interval }, callback) {
+/**
+ *
+ * @param {object} options {startTime: String, endTime: String, interval: Number}
+ * @param {function} callback called every interval
+ * @returns {String} the queue identificator
+ */
+function start(options, callback) {
   // Possible problems:
   // - If want to change options
 
   const id = uuid();
-
-  QUEUES[id] = { active: true };
+  QUEUES[id] = { active: true, ...options };
 
   function timedQueue() {
+    const { startTime, endTime, interval, cron, active } = QUEUES[id];
     const startDate = stringTimeToDate(startTime);
     startDate.setDate(startDate.getDate() + 1);
-    if (!QUEUES[id].cron) {
+    if (!cron) {
       QUEUES[id].cron = new CronJob(startDate, timedQueue);
     }
     if (isInPublishingRange({ startTime, endTime })) {
@@ -92,20 +98,20 @@ function startQueue({ startTime, endTime, interval }, callback) {
       } catch (error) {
         console.log("Error in queue", error);
       } finally {
-        if (QUEUES[id].active) {
+        if (active) {
           const timeInterval = minutesToMiliseconds(interval);
           setTimeout(timedQueue, timeInterval);
         }
       }
     } else {
-      QUEUES[id].cron.start();
+      cron.start();
     }
   }
 
-  if (isInPublishingRange({ startTime, endTime })) {
+  if (isInPublishingRange(options)) {
     timedQueue();
   } else {
-    const startDate = stringTimeToDate(startTime);
+    const startDate = stringTimeToDate(options.startTime);
     QUEUES[id].cron = new CronJob(startDate, timedQueue);
     QUEUES[id].cron.start();
   }
@@ -113,14 +119,19 @@ function startQueue({ startTime, endTime, interval }, callback) {
   return id;
 }
 
-function stopQueue(id) {
+function stop(id) {
   QUEUES[id].cron.stop();
   QUEUES[id].cron = null;
   QUEUES[id].active = false;
 }
 
+function updateOptions(id, opts) {
+  QUEUES[id] = { ...QUEUES[id], ...opts };
+}
+
 module.exports = {
-  startQueue,
-  stopQueue,
+  start,
+  stop,
+  updateOptions,
   isInPublishingRange
 };
