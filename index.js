@@ -21,7 +21,7 @@ function validateTimeInput(time) {
     time
   );
   if (!isValid) {
-    throw "Parameter is not a valid time, e.g.: 10:25!";
+    throw "Parameter is not a valid time, e.g.: 10:25";
   }
 }
 
