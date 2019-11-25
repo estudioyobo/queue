@@ -12,7 +12,7 @@ function stringTimeToDate(stringTime) {
   return time;
 }
 
-function isInPublishingRange(now = new Date(), { startTime, endTime }) {
+function isInPublishingRange({ startTime, endTime }, now = new Date()) {
   const aTime = stringTimeToDate(startTime);
   const bTime = stringTimeToDate(endTime);
   if (bTime < aTime) {
