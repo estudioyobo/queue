@@ -1,10 +1,10 @@
 const CronJob = require("cron").CronJob;
+const uuid = require("uuid/v4");
 
-let CURRENT_CRON = null;
-let QUEUE_STOPPED = false;
+let QUEUES = {};
 
 function minutesToMiliseconds(time) {
-  return time * 10 * 60;
+  return time * 1000 * 60;
 }
 
 function stringTimeToDate(stringTime) {
@@ -76,13 +76,15 @@ function startQueue({ startTime, endTime, interval }, callback) {
   // Possible problems:
   // - If want to change options
 
-  QUEUE_STOPPED = false;
+  const id = uuid();
+
+  QUEUES[id] = { active: true };
 
   function timedQueue() {
     const startDate = stringTimeToDate(startTime);
     startDate.setDate(startDate.getDate() + 1);
-    if (!CURRENT_CRON) {
-      CURRENT_CRON = new CronJob(startDate, timedQueue);
+    if (!QUEUES[id].cron) {
+      QUEUES[id].cron = new CronJob(startDate, timedQueue);
     }
     if (isInPublishingRange({ startTime, endTime })) {
       try {
@@ -90,13 +92,13 @@ function startQueue({ startTime, endTime, interval }, callback) {
       } catch (error) {
         console.log("Error in queue", error);
       } finally {
-        if (!QUEUE_STOPPED) {
+        if (QUEUES[id].active) {
           const timeInterval = minutesToMiliseconds(interval);
           setTimeout(timedQueue, timeInterval);
         }
       }
     } else {
-      CURRENT_CRON.start();
+      QUEUES[id].cron.start();
     }
   }
 
@@ -104,15 +106,17 @@ function startQueue({ startTime, endTime, interval }, callback) {
     timedQueue();
   } else {
     const startDate = stringTimeToDate(startTime);
-    CURRENT_CRON = new CronJob(startDate, timedQueue);
-    CURRENT_CRON.start();
+    QUEUES[id].cron = new CronJob(startDate, timedQueue);
+    QUEUES[id].cron.start();
   }
+
+  return id;
 }
 
-function stopQueue() {
-  CURRENT_CRON.stop();
-  CURRENT_CRON = null;
-  QUEUE_STOPPED = true;
+function stopQueue(id) {
+  QUEUES[id].cron.stop();
+  QUEUES[id].cron = null;
+  QUEUES[id].active = false;
 }
 
 module.exports = {

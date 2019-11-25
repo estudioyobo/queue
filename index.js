@@ -19,13 +19,12 @@ app.use(
 app.use(cors());
 
 app.get("/stop", (req, res) => {
-  stopQueue();
+  stopQueue(req.query.id);
   res.send({ ok: true });
 });
 
-app.listen(PORT, () => {
-  console.log("Http server running and listening on port", PORT);
-  startQueue(
+app.get("/start", (req, res) => {
+  const id = startQueue(
     {
       startTime: "09:00",
       endTime: "23:00",
@@ -33,4 +32,9 @@ app.listen(PORT, () => {
     },
     () => console.log("iterando")
   );
+  res.send(id);
+});
+
+app.listen(PORT, () => {
+  console.log("Http server running and listening on port", PORT);
 });
