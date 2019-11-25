@@ -30,48 +30,6 @@ function isInPublishingRange({ startTime, endTime }, now = new Date()) {
   return now <= endDate && now >= startDate;
 }
 
-function isInPublishingRange2({ startTime, endTime }, now = new Date()) {
-  const parseStart = startTime.split(":").map(s => Number(s));
-  const parseEnd = endTime.split(":").map(s => Number(s));
-  const nowDate = { hour: now.getHours(), minute: now.getMinutes() };
-  const startDate = { hour: parseStart[0], minute: parseStart[1] };
-  const endDate = { hour: parseEnd[0], minute: parseEnd[1] };
-
-  // Check hours when end date is after midnight
-  if (endDate.hour < startDate.hour) {
-    // Date between start and midnight
-    if (nowDate.hour >= startDate.hour) {
-      return true;
-      // same hour
-    } else if (nowDate.hour >= 0 && nowDate.hour <= endDate.hour) {
-      // minutes in range
-      if (nowDate.hour === endDate.hour && nowDate.minute > endDate.minute) {
-        return false;
-      }
-      return true;
-    }
-  } else {
-    // In range
-    if (nowDate.hour < endDate.hour && nowDate.hour > startDate.hour) {
-      return true;
-      // same hour
-    } else if (
-      nowDate.hour === endDate.hour ||
-      nowDate.hour === startDate.hour
-    ) {
-      // minutes in range
-      if (
-        nowDate.minute > endDate.minute ||
-        nowDate.minute < startDate.minute
-      ) {
-        return false;
-      } else {
-        return true;
-      }
-    }
-  }
-}
-
 /**
  *
  * @param {object} options {startTime: String, endTime: String, interval: Number}
@@ -79,9 +37,6 @@ function isInPublishingRange2({ startTime, endTime }, now = new Date()) {
  * @returns {String} the queue identificator
  */
 function start(options, callback) {
-  // Possible problems:
-  // - If want to change options
-
   const id = uuid();
   QUEUES[id] = { active: true, ...options };
 
