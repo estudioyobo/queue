@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const { startQueue } = require("./queue.js");
+const { startQueue, stopQueue } = require("./queue.js");
 
 // your express configuration here
 const app = express();
@@ -18,7 +18,19 @@ app.use(
 // CORS
 app.use(cors());
 
+app.get("/stop", (req, res) => {
+  stopQueue();
+  res.send({ ok: true });
+});
+
 app.listen(PORT, () => {
   console.log("Http server running and listening on port", PORT);
-  startQueue();
+  startQueue(
+    {
+      startTime: "09:00",
+      endTime: "23:00",
+      interval: 1
+    },
+    () => console.log("iterando")
+  );
 });

@@ -4,6 +4,20 @@ describe("Publish range 09:00 - 21:00", () => {
   afterEach(() => {
     MockDate.reset();
   });
+  it("should not publish on 09:00 (range start at 09:10)", () => {
+    const now = new Date();
+    now.setHours(9);
+    now.setMinutes(0);
+    // MockDate.set(now);
+    const inRange = isInPublishingRange(
+      {
+        startTime: "09:10",
+        endTime: "21:00"
+      },
+      now
+    );
+    expect(inRange).toBeFalsy();
+  });
   it("should publish on 10:21", () => {
     const now = new Date();
     now.setHours(10);
@@ -36,6 +50,7 @@ describe("Publish range 09:00 - 21:00", () => {
     const now = new Date();
     now.setHours(21);
     now.setMinutes(0);
+    now.setMilliseconds(0);
     // MockDate.set(now);
     const inRange = isInPublishingRange(
       {
@@ -125,6 +140,7 @@ describe("Publish range 09:00 - 01:00", () => {
     const now = new Date();
     now.setHours(1);
     now.setMinutes(0);
+    now.setMilliseconds(0);
     now.setDate(now.getDate() + 1);
     // MockDate.set(now);
     const inRange = isInPublishingRange(
@@ -183,6 +199,7 @@ describe("Publish range 09:00 - 01:00", () => {
     const now = new Date();
     now.setHours(1);
     now.setMinutes(0);
+    now.setMilliseconds(0);
     // now.setDate(now.getDate() + 1);
     // MockDate.set(now);
     const inRange = isInPublishingRange(
@@ -192,7 +209,7 @@ describe("Publish range 09:00 - 01:00", () => {
       },
       now
     );
-    expect(inRange).toBeFalsy();
+    expect(inRange).toBeTruthy();
   });
   it("should publish on 00:25 and now is 00:25", () => {
     const now = new Date();
@@ -210,6 +227,7 @@ describe("Publish range 09:00 - 01:00", () => {
     expect(inRange).toBeTruthy();
   });
 });
+
 // describe("Publish range 00:00 - 09:00", () => {
 //   afterEach(() => {
 //     MockDate.reset();
