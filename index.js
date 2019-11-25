@@ -16,6 +16,15 @@ function stringTimeToDate(stringTime) {
   return time;
 }
 
+function validateTimeInput(time) {
+  const isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(
+    time
+  );
+  if (!isValid) {
+    throw "Parameter is not a valid time, e.g.: 10:25!";
+  }
+}
+
 function isInPublishingRange({ startTime, endTime }, now = new Date()) {
   const startDate = stringTimeToDate(startTime);
   const endDate = stringTimeToDate(endTime);
@@ -38,6 +47,8 @@ function isInPublishingRange({ startTime, endTime }, now = new Date()) {
  */
 function start(options, callback) {
   const id = uuid();
+  validateTimeInput(options.startTime);
+  validateTimeInput(options.endTime);
   QUEUES[id] = { active: true, ...options };
 
   function timedQueue() {
@@ -81,6 +92,12 @@ function stop(id) {
 }
 
 function updateOptions(id, opts) {
+  if (opts.startTime) {
+    validateTimeInput(opts.startTime);
+  }
+  if (opts.endTime) {
+    validateTimeInput(opts.endTime);
+  }
   QUEUES[id] = { ...QUEUES[id], ...opts };
 }
 
@@ -88,5 +105,6 @@ module.exports = {
   start,
   stop,
   updateOptions,
-  isInPublishingRange
+  isInPublishingRange,
+  validateTimeInput
 };

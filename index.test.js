@@ -1,4 +1,4 @@
-const { isInPublishingRange } = require("./index");
+const { isInPublishingRange, validateTimeInput } = require("./index");
 const MockDate = require("mockdate");
 describe("Publish range 09:00 - 21:00", () => {
   afterEach(() => {
@@ -225,5 +225,28 @@ describe("Publish range 09:00 - 01:00", () => {
       now
     );
     expect(inRange).toBeTruthy();
+  });
+});
+describe("Validate Time Input", () => {
+  it("should passed silently with 00:00", () => {
+    validateTimeInput("00:00");
+  });
+  it("should throw expection with 25:00", () => {
+    expect(() => {
+      validateTimeInput("25:00");
+    }).toThrow("Parameter is not a valid time, e.g.: 10:25!");
+  });
+  it("should throw expection with 23:59", () => {
+    validateTimeInput("23:59");
+  });
+  it("should throw expection with 01:60", () => {
+    expect(() => {
+      validateTimeInput("01:60");
+    }).toThrow("Parameter is not a valid time, e.g.: 10:25!");
+  });
+  it("should throw expection with 325:650", () => {
+    expect(() => {
+      validateTimeInput("325:650");
+    }).toThrow("Parameter is not a valid time, e.g.: 10:25!");
   });
 });
