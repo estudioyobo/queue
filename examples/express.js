@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const Queue = require("./queue.js");
+const Queue = require("../index");
 
 // your express configuration here
 const app = express();
@@ -29,14 +29,12 @@ app.get("/update", (req, res) => {
 });
 
 app.get("/start", (req, res) => {
-  const id = Queue.start(
-    {
-      startTime: "09:00",
-      endTime: "23:00",
-      interval: 1
-    },
-    () => console.log("iterando")
-  );
+  const id = Queue.start({
+    startTime: "09:00",
+    endTime: "23:00",
+    interval: 1,
+    action: ({ id }) => console.log(`iterando la cola ${id}`)
+  });
   res.send(id);
 });
 
