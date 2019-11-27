@@ -49,7 +49,7 @@ function start(options) {
   const { action, onStart, onStop, ...rest } = options;
   validateTimeInput(options.startTime);
   validateTimeInput(options.endTime);
-  QUEUES[id] = { active: true, ...rest };
+  QUEUES[id] = { id, active: true, ...rest };
 
   function timedQueue() {
     const { startTime, endTime, interval, cron, active } = QUEUES[id];
@@ -61,7 +61,7 @@ function start(options) {
     if (isInPublishingRange({ startTime, endTime })) {
       try {
         if (action) {
-          action();
+          action(QUEUES[id]);
         }
       } catch (error) {
         console.log("Error in queue", error);
@@ -73,7 +73,7 @@ function start(options) {
       }
     } else {
       if (onStop) {
-        onStop();
+        onStop(QUEUES[id]);
       }
       cron.start();
     }
@@ -81,7 +81,7 @@ function start(options) {
 
   if (isInPublishingRange(options)) {
     if (onStart) {
-      onStart();
+      onStart(QUEUES[id]);
     }
     timedQueue();
   } else {
