@@ -41,15 +41,15 @@ function isInPublishingRange({ startTime, endTime }, now = new Date()) {
 
 /**
  *
- * @param {object} options {startTime: String, endTime: String, interval: Number}
- * @param {function} callback called every interval
+ * @param {object} options {startTime: String, endTime: String, interval: Number, action: function, onStart: function, onStop: function}
  * @returns {String} the queue identificator
  */
-function start(options, callback) {
+function start(options) {
   const id = uuid();
+  const { action, onStart, onStop, ...rest } = options;
   validateTimeInput(options.startTime);
   validateTimeInput(options.endTime);
-  QUEUES[id] = { active: true, ...options };
+  QUEUES[id] = { active: true, ...rest };
 
   function timedQueue() {
     const { startTime, endTime, interval, cron, active } = QUEUES[id];
@@ -60,7 +60,9 @@ function start(options, callback) {
     }
     if (isInPublishingRange({ startTime, endTime })) {
       try {
-        callback();
+        if (action) {
+          action();
+        }
       } catch (error) {
         console.log("Error in queue", error);
       } finally {
@@ -70,11 +72,17 @@ function start(options, callback) {
         }
       }
     } else {
+      if (onStop) {
+        onStop();
+      }
       cron.start();
     }
   }
 
   if (isInPublishingRange(options)) {
+    if (onStart) {
+      onStart();
+    }
     timedQueue();
   } else {
     const startDate = stringTimeToDate(options.startTime);
