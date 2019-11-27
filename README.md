@@ -4,16 +4,19 @@ Package to call periodic callbacks within an interval given a time range.
 
 ## API
 
-- **start(options, callback): _String_**
+- **start(options): _String_**
 
-  Receives an object with the options `{startTime: String, endTime: String, interval: Number}`, and the function to be called.
+  Receives an object with the options `{startTime: String, endTime: String, interval: Number, action: function, onStart: function, onStop: function}`, and the function to be called.
 
   Example:
 
   ```js
-  start({ startTime: "09:00", endTime: "23:30", interval: 15 }, () =>
-    console.log("Hello World!")
-  );
+  start({ 
+    startTime: "09:00", 
+    endTime: "23:30", 
+    interval: 15, 
+    action: () => console.log("Hello World!")
+  });
   ```
 
   With this configuration, a queue is created, which prints `Hello world` every 15 minutes between 09:00-23:30 every day.
