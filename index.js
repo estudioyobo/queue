@@ -13,6 +13,9 @@ function stringTimeToDate(stringTime) {
   time.setHours(hour);
   time.setMinutes(minute);
   time.setMilliseconds(0);
+  if (time <= Date.now()) {
+    time.setDate(time.getDate() + 1);
+  }
   return time;
 }
 
@@ -114,5 +117,5 @@ module.exports = {
   stop,
   updateOptions,
   isInPublishingRange,
-  validateTimeInput
+  validateTimeInput,
 };
