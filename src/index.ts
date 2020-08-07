@@ -1,25 +1,53 @@
 const CronJob = require("cron").CronJob;
 const uuid = require("uuid/v4");
 
-let QUEUES = {};
+interface IPublishRange {
+  startTime: string;
+  endTime: string;
+}
 
-function minutesToMiliseconds(minutes) {
+interface IQueueOptions extends IPublishRange {
+  interval: number;
+}
+
+interface IStartOptionsProps extends IQueueOptions {
+  action: (queueInfo: IQueueInfo) => void;
+  onStart: (queueInfo: IQueueInfo) => void;
+  onStop: (queueInfo: IQueueInfo) => void;
+}
+
+interface IQueueInfo extends IQueueOptions {
+  active: boolean;
+  id: string;
+  cron?: typeof CronJob;
+}
+
+interface IQueueMap {
+  [key: string]: IQueueInfo;
+}
+
+let QUEUES: IQueueMap = {};
+
+function minutesToMiliseconds(minutes: number): number {
   return minutes * 1000 * 60;
 }
 
-function stringTimeToDate(stringTime) {
+export function stringTimeToDate(
+  stringTime: string,
+  now = new Date(Date.now())
+): Date {
   const time = new Date();
   const [hour, minute] = stringTime.split(":");
-  time.setHours(hour);
-  time.setMinutes(minute);
+  time.setHours(parseInt(hour));
+  time.setMinutes(parseInt(minute));
   time.setMilliseconds(0);
-  if (time <= Date.now()) {
+  if (time <= now) {
     time.setDate(time.getDate() + 1);
   }
   return time;
 }
 
-function validateTimeInput(time) {
+export function validateTimeInput(time: string) {
   const isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(
     time
   );
@@ -28,9 +56,12 @@ function validateTimeInput(time) {
   }
 }
 
-function isInPublishingRange({ startTime, endTime }, now = new Date()) {
-  const startDate = stringTimeToDate(startTime);
-  const endDate = stringTimeToDate(endTime);
+export function isInPublishingRange(
+  { startTime, endTime }: IPublishRange,
+  now = new Date()
+): boolean {
+  const startDate = stringTimeToDate(startTime, now);
+  const endDate = stringTimeToDate(endTime, now);
 
   if (endDate < startDate) {
     endDate.setDate(endDate.getDate() + 1);
@@ -47,7 +78,7 @@ function isInPublishingRange({ startTime, endTime }, now = new Date()) {
  * @param {object} options {startTime: String, endTime: String, interval: Number, action: function, onStart: function, onStop: function}
  * @returns {String} the queue identificator
  */
-function start(options) {
+export function start(options: IStartOptionsProps): string {
   const id = uuid();
   const { action, onStart, onStop, ...rest } = options;
   validateTimeInput(options.startTime);
@@ -102,13 +133,13 @@ function start(options) {
   return id;
 }
 
-function stop(id) {
+export function stop(id: string) {
   QUEUES[id].cron.stop();
   QUEUES[id].cron = null;
   QUEUES[id].active = false;
 }
 
-function updateOptions(id, opts) {
+export function updateOptions(id: string, opts: IQueueOptions) {
   if (opts.startTime) {
     validateTimeInput(opts.startTime);
   }
@@ -117,11 +148,3 @@ function updateOptions(id, opts) {
   }
   QUEUES[id] = { ...QUEUES[id], ...opts };
 }
-
-module.exports = {
-  start,
-  stop,
-  updateOptions,
-  isInPublishingRange,
-  validateTimeInput,
-};

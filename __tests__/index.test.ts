@@ -1,5 +1,6 @@
-const { isInPublishingRange, validateTimeInput } = require("./index");
-const MockDate = require("mockdate");
+import { isInPublishingRange, validateTimeInput } from "../src/index";
+import * as MockDate from "mockdate";
+
 describe("Publish range 09:00 - 21:00", () => {
   afterEach(() => {
     MockDate.reset();
@@ -12,7 +13,7 @@ describe("Publish range 09:00 - 21:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:10",
-        endTime: "21:00"
+        endTime: "21:00",
       },
       now
     );
@@ -26,7 +27,7 @@ describe("Publish range 09:00 - 21:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "21:00"
+        endTime: "21:00",
       },
       now
     );
@@ -40,7 +41,7 @@ describe("Publish range 09:00 - 21:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "21:00"
+        endTime: "21:00",
       },
       now
     );
@@ -55,7 +56,7 @@ describe("Publish range 09:00 - 21:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "21:00"
+        endTime: "21:00",
       },
       now
     );
@@ -69,7 +70,7 @@ describe("Publish range 09:00 - 21:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "21:00"
+        endTime: "21:00",
       },
       now
     );
@@ -83,7 +84,7 @@ describe("Publish range 09:00 - 21:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "21:00"
+        endTime: "21:00",
       },
       now
     );
@@ -97,7 +98,7 @@ describe("Publish range 09:00 - 21:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "21:00"
+        endTime: "21:00",
       },
       now
     );
@@ -116,7 +117,7 @@ describe("Publish range 09:00 - 01:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "01:00"
+        endTime: "01:00",
       },
       now
     );
@@ -130,7 +131,7 @@ describe("Publish range 09:00 - 01:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "01:00"
+        endTime: "01:00",
       },
       now
     );
@@ -146,7 +147,7 @@ describe("Publish range 09:00 - 01:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "01:00"
+        endTime: "01:00",
       },
       now
     );
@@ -160,7 +161,7 @@ describe("Publish range 09:00 - 01:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "01:00"
+        endTime: "01:00",
       },
       now
     );
@@ -174,7 +175,7 @@ describe("Publish range 09:00 - 01:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "01:00"
+        endTime: "01:00",
       },
       now
     );
@@ -189,7 +190,7 @@ describe("Publish range 09:00 - 01:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "01:00"
+        endTime: "01:00",
       },
       now
     );
@@ -205,7 +206,7 @@ describe("Publish range 09:00 - 01:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "01:00"
+        endTime: "01:00",
       },
       now
     );
@@ -220,7 +221,7 @@ describe("Publish range 09:00 - 01:00", () => {
     const inRange = isInPublishingRange(
       {
         startTime: "09:00",
-        endTime: "01:00"
+        endTime: "01:00",
       },
       now
     );
