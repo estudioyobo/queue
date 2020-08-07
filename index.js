@@ -54,42 +54,48 @@ function start(options) {
   validateTimeInput(options.endTime);
   QUEUES[id] = { id, active: true, ...rest };
 
-  function timedQueue() {
-    const { startTime, endTime, interval, cron, active } = QUEUES[id];
-    const startDate = stringTimeToDate(startTime);
-    startDate.setDate(startDate.getDate() + 1);
-    if (!cron) {
-      QUEUES[id].cron = new CronJob(startDate, timedQueue);
-    }
-    if (isInPublishingRange({ startTime, endTime })) {
-      try {
-        if (action) {
-          action(QUEUES[id]);
-        }
-      } catch (error) {
-        console.log("Error in queue", error);
-      } finally {
-        if (active) {
-          const timeInterval = minutesToMiliseconds(interval);
-          setTimeout(timedQueue, timeInterval);
+  function timedQueue(firstTime = false) {
+    return () => {
+      const { startTime, endTime, interval, cron, active } = QUEUES[id];
+      const startDate = stringTimeToDate(startTime);
+      startDate.setDate(startDate.getDate() + 1);
+      if (firstTime) {
+        if (onStart) {
+          onStart(QUEUES[id]);
         }
       }
-    } else {
-      if (onStop) {
-        onStop(QUEUES[id]);
+      if (!cron) {
+        QUEUES[id].cron = new CronJob(startDate, timedQueue);
       }
-      cron.start();
-    }
+      if (isInPublishingRange({ startTime, endTime })) {
+        try {
+          if (action) {
+            action(QUEUES[id]);
+          }
+        } catch (error) {
+          console.log("Error in queue", error);
+        } finally {
+          if (active) {
+            const timeInterval = minutesToMiliseconds(interval);
+            setTimeout(timedQueue(), timeInterval);
+          }
+        }
+      } else {
+        if (onStop) {
+          onStop(QUEUES[id]);
+        }
+        // Start again in future
+        QUEUES[id].cron = new CronJob(startDate, timedQueue(true));
+        QUEUES[id].cron.start();
+      }
+    };
   }
 
   if (isInPublishingRange(options)) {
-    if (onStart) {
-      onStart(QUEUES[id]);
-    }
-    timedQueue();
+    timedQueue(true)();
   } else {
     const startDate = stringTimeToDate(options.startTime);
-    QUEUES[id].cron = new CronJob(startDate, timedQueue);
+    QUEUES[id].cron = new CronJob(startDate, timedQueue(true));
     QUEUES[id].cron.start();
   }
 
