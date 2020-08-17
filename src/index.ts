@@ -10,10 +10,10 @@ interface IQueueOptions extends IPublishRange {
   interval: number;
 }
 
-interface IStartOptionsProps extends IQueueOptions {
+export interface IStartOptionsProps extends IQueueOptions {
   action: (queueInfo: IQueueInfo) => void;
-  onStart: (queueInfo: IQueueInfo) => void;
-  onStop: (queueInfo: IQueueInfo) => void;
+  onStart?: (queueInfo: IQueueInfo) => void;
+  onStop?: (queueInfo: IQueueInfo) => void;
 }
 
 interface IQueueInfo extends IQueueOptions {
@@ -40,6 +40,8 @@ export function stringTimeToDate(
   const [hour, minute] = stringTime.split(":");
   time.setHours(parseInt(hour));
   time.setMinutes(parseInt(minute));
+  time.setMonth(now.getMonth());
+  time.setDate(now.getDate());
   time.setMilliseconds(0);
   if (time <= now) {
     time.setDate(time.getDate() + 1);
@@ -58,10 +60,13 @@ export function validateTimeInput(time: string) {
 
 export function isInPublishingRange(
   { startTime, endTime }: IPublishRange,
-  now = new Date()
+  now = new Date(Date.now())
 ): boolean {
+  console.log("now", now.toISOString());
   const startDate = stringTimeToDate(startTime, now);
   const endDate = stringTimeToDate(endTime, now);
+  console.log("startDate", startDate.toISOString());
+  console.log("endDate", endDate.toISOString());
 
   if (endDate < startDate) {
     endDate.setDate(endDate.getDate() + 1);
@@ -115,6 +120,7 @@ export function start(options: IStartOptionsProps): string {
         if (onStop) {
           onStop(QUEUES[id]);
         }
+        console.log("Set cron for next day:", startDate.toISOString());
         // Start again in future
         QUEUES[id].cron = new CronJob(startDate, timedQueue(true));
         QUEUES[id].cron.start();
