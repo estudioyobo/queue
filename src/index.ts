@@ -43,6 +43,7 @@ export function stringTimeToDate(
   time.setMonth(now.getMonth());
   time.setDate(now.getDate());
   time.setMilliseconds(0);
+  time.setSeconds(0);
   if (time <= now) {
     time.setDate(time.getDate() + 1);
   }
@@ -62,11 +63,8 @@ export function isInPublishingRange(
   { startTime, endTime }: IPublishRange,
   now = new Date(Date.now())
 ): boolean {
-  console.log("now", now.toISOString());
   const startDate = stringTimeToDate(startTime, now);
   const endDate = stringTimeToDate(endTime, now);
-  console.log("startDate", startDate.toISOString());
-  console.log("endDate", endDate.toISOString());
 
   if (endDate < startDate) {
     endDate.setDate(endDate.getDate() + 1);
@@ -94,15 +92,15 @@ export function start(options: IStartOptionsProps): string {
     return () => {
       const { startTime, endTime, interval, cron, active } = QUEUES[id];
       const startDate = stringTimeToDate(startTime);
-      startDate.setDate(startDate.getDate() + 1);
+      // startDate.setDate(startDate.getDate() + 1);
       if (firstTime) {
         if (onStart) {
           onStart(QUEUES[id]);
         }
       }
-      if (!cron) {
-        QUEUES[id].cron = new CronJob(startDate, timedQueue);
-      }
+      // if (!cron) {
+      //   QUEUES[id].cron = new CronJob(startDate, timedQueue(true));
+      // }
       if (isInPublishingRange({ startTime, endTime })) {
         try {
           if (action) {
@@ -120,7 +118,6 @@ export function start(options: IStartOptionsProps): string {
         if (onStop) {
           onStop(QUEUES[id]);
         }
-        console.log("Set cron for next day:", startDate.toISOString());
         // Start again in future
         QUEUES[id].cron = new CronJob(startDate, timedQueue(true));
         QUEUES[id].cron.start();

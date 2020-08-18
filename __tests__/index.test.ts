@@ -3,14 +3,21 @@ import {
   validateTimeInput,
   start,
   IStartOptionsProps,
-  updateOptions,
 } from "../src/index";
-const CronJob = require("cron");
+const CronJob = require("cron").CronJob;
 import * as MockDate from "mockdate";
 
-jest.mock("cron");
+const mockStart = jest.fn();
+jest.mock("cron", () => {
+  return {
+    CronJob: jest.fn().mockImplementation(() => {
+      return {
+        start: mockStart,
+      };
+    }),
+  };
+});
 
-/*
 describe("Publish range 09:00 - 21:00", () => {
   afterEach(() => {
     MockDate.reset();
@@ -61,6 +68,7 @@ describe("Publish range 09:00 - 21:00", () => {
     const now = new Date();
     now.setHours(21);
     now.setMinutes(0);
+    now.setSeconds(0);
     now.setMilliseconds(0);
     // MockDate.set(now);
     const inRange = isInPublishingRange(
@@ -152,6 +160,7 @@ describe("Publish range 09:00 - 01:00", () => {
     now.setHours(1);
     now.setMinutes(0);
     now.setMilliseconds(0);
+    now.setSeconds(0);
     now.setDate(now.getDate() + 1);
     // MockDate.set(now);
     const inRange = isInPublishingRange(
@@ -211,6 +220,7 @@ describe("Publish range 09:00 - 01:00", () => {
     now.setHours(1);
     now.setMinutes(0);
     now.setMilliseconds(0);
+    now.setSeconds(0);
     // now.setDate(now.getDate() + 1);
     // MockDate.set(now);
     const inRange = isInPublishingRange(
@@ -261,10 +271,10 @@ describe("Validate Time Input", () => {
     }).toThrow("Parameter is not a valid time, e.g.: 10:25");
   });
 });
-*/
 describe("Renew cron when ends", () => {
   beforeEach(() => {
     jest.useFakeTimers();
+    // CronJob.mockClear();
   });
   it("should call Cron with startDate", () => {
     const options: IStartOptionsProps = {
@@ -280,13 +290,19 @@ describe("Renew cron when ends", () => {
       .spyOn(global.Date, "now")
       .mockImplementationOnce(() =>
         new Date("2020-04-12T09:30:00.135Z").valueOf()
-      ) // Fist call
+      ) // Fist call start publishigRange
       .mockImplementationOnce(() =>
         new Date("2020-04-12T09:30:00.135Z").valueOf()
-      ) // First iteration in timedQueue
+      ) // First iteration in timedQueue stringTime
+      .mockImplementationOnce(() =>
+        new Date("2020-04-12T09:30:00.135Z").valueOf()
+      ) // First iteration in timedQueue publishigRange
       .mockImplementationOnce(() =>
         new Date("2020-04-12T23:30:00.135Z").valueOf()
-      ); // Second iteration in timedQueue
+      ) // Second iteration in timedQueue stringTime
+      .mockImplementationOnce(() =>
+        new Date("2020-04-12T23:30:00.135Z").valueOf()
+      ); // Second iteration in timedQueue publishigRange
 
     const id = start(options);
 
@@ -296,9 +312,12 @@ describe("Renew cron when ends", () => {
     jest.runOnlyPendingTimers();
 
     expect(options.onStart).toHaveBeenCalledTimes(1);
-    expect(options.action).toHaveBeenCalledTimes(2);
+    expect(options.action).toHaveBeenCalledTimes(1);
     expect(options.onStop).toHaveBeenCalledTimes(1);
-
-    expect(CronJob).toHaveBeenCalledTimes(1);
+    expect(CronJob).toBeCalled();
+    expect(CronJob.mock.calls[0][0]).toEqual(
+      new Date("2020-04-13T07:00:00.000Z")
+    );
+    expect(mockStart).toHaveBeenCalled();
   });
 });
